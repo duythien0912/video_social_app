@@ -2,9 +2,6 @@
 
 A new Flutter project.
 
-<video width="320" height="240" controls>
-  <source src="demo.mp4" type="video/mp4">
-</video>
 
 ## Getting Started
 
@@ -18,3 +15,9 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+
+Demo:
+
+https://user-images.githubusercontent.com/20185622/195805607-84b36325-754b-4d77-8db0-ab63a8b4988a.mp4
+
