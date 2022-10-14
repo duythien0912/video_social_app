@@ -13,16 +13,6 @@ final dataM3u8Json = {
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb08.png",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb09.png",
     //
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb01.png",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb02.png",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb03.png",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb04.png",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb05.png",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb06.png",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb07.png",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb08.png",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb09.png",
-    //
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb10.png",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb11.png",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb12.png",
@@ -60,16 +50,6 @@ final dataM3u8Json = {
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video07.m3u8",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video08.m3u8",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video09.m3u8",
-    //
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/mp4/video01.mp4",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/mp4/video02.mp4",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/mp4/video03.mp4",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/mp4/video04.mp4",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/mp4/video05.mp4",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/mp4/video06.mp4",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/mp4/video07.mp4",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/mp4/video08.mp4",
-    "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/mp4/video09.mp4",
     //
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video10.m3u8",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video11.m3u8",

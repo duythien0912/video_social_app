@@ -132,23 +132,9 @@ class _DouyinPlayerState extends State<DouyinPlayer>
                   ),
                 ),
               ),
-              SizedBox.expand(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: widget.douyinPlayerController.videoPlayerController
-                        .value.size.width,
-                    height: widget.douyinPlayerController.videoPlayerController
-                        .value.size.height,
-                    child: VideoPlayer(
-                      widget.douyinPlayerController.videoPlayerController,
-                    ),
-                  ),
-                ),
-              ),
               Container(
                 height: 200,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -167,7 +153,7 @@ class _DouyinPlayerState extends State<DouyinPlayer>
                 alignment: Alignment.bottomCenter,
                 child: Container(
                   height: 200,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,

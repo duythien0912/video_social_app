@@ -1,14 +1,18 @@
-import 'package:flutter/gestures.dart';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:video_driven_app/preload_page_view.dart';
+import 'package:video_driven_app/my_app_v2.dart';
 
 import 'lifecycle/lifecycle.dart';
 import 'player/tiktok_player.dart';
 import 'player/tiktok_player_controller.dart';
 
-void main() {
-  runApp(const ProviderScope(child: MyApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+  // runApp(const ProviderScope(child: MyApp()));
+  runApp(const ProviderScope(child: MyAppV2()));
 }
 
 class MyApp extends StatelessWidget {
