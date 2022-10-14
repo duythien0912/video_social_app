@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_driven_app/preload_page_view.dart';
@@ -50,21 +51,56 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black87,
-      body: HomeWidget(),
+      body: Column(
+        children: const [
+          Expanded(child: HomeWidget()),
+          SizedBox(
+            height: 80,
+          ),
+        ],
+      ),
     );
   }
 }
 
-class HomeWidget extends ConsumerWidget {
-  HomeWidget({
-    Key? key,
-  }) : super(key: key);
-
-  final PreloadPageController _pageController = PreloadPageController();
+class HomeWidget extends ConsumerStatefulWidget {
+  const HomeWidget({super.key});
 
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomeWidgetState();
+}
+
+class _HomeWidgetState extends ConsumerState<HomeWidget> {
+  int _currentIndex = 0;
+  List<DouyinPlayerController> _pageControllerList = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    final list = ref.read(dataSourceProvider);
+    _pageControllerList = List.generate(
+      list.length,
+      (index) => DouyinPlayerController(
+        url: list[index],
+        isPlaying: index == 0,
+      ),
+    ).toList();
+  }
+
+  @override
+  void dispose() {
+    for (var element in _pageControllerList) {
+      element.dispose();
+    }
+    _pageControllerList.clear();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final videos = ref.watch(dataSourceProvider);
+    final images = ref.watch(dataSourceImageProvider);
     return PageViewLifecycleWrapper(
       onLifecycleEvent: (LifecycleEvent event) {
         debugPrint(
@@ -72,16 +108,34 @@ class HomeWidget extends ConsumerWidget {
       },
       child: PageView.builder(
         allowImplicitScrolling: true,
+        // dragStartBehavior: DragStartBehavior.down,
+        // physics: NeverScrollableScrollPhysics(),
         scrollDirection: Axis.vertical,
         itemCount: videos.length,
         // controller: _pageController,
         // preloadPagesCount: 0,
-        onPageChanged: (int index) {
+        onPageChanged: (int index) async {
           ref.read(playingVideoProvider.notifier).state =
               videos[index].toString();
+
+          debugPrint('index:$index');
+          DouyinPlayerController preController =
+              _pageControllerList[_currentIndex];
+          DouyinPlayerController currentController = _pageControllerList[index];
+          try {
+            // preController.pause();
+            preController.dispose();
+          } catch (e) {
+            debugPrint('$e');
+          }
+          await Future.delayed(const Duration(milliseconds: 400));
+          currentController.play();
+          _currentIndex = index;
         },
+        // layout: SwiperLayout.STACK,
         itemBuilder: (BuildContext context, int index) {
           String source = videos[index];
+          String image = images[index];
           return ChildPageLifecycleWrapper(
             wantKeepAlive: false,
             index: index,
@@ -91,6 +145,7 @@ class HomeWidget extends ConsumerWidget {
             },
             child: DouyinPlayer(
               source: source,
+              image: image,
               douyinPlayerController: DouyinPlayerController(
                 url: source,
                 isPlaying: index == 0,

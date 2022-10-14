@@ -9,10 +9,12 @@ class DouyinPlayer extends StatefulWidget {
   const DouyinPlayer({
     super.key,
     this.source,
+    this.image,
     required this.douyinPlayerController,
   });
 
   final String? source;
+  final String? image;
   final DouyinPlayerController douyinPlayerController;
 
   @override
@@ -109,9 +111,16 @@ class _DouyinPlayerState extends State<DouyinPlayer>
           },
           child: Stack(
             children: [
+              if (widget.image != null)
+                SizedBox.expand(
+                  child: Image.network(
+                    widget.image!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               SizedBox.expand(
                 child: FittedBox(
-                  fit: BoxFit.contain,
+                  fit: BoxFit.cover,
                   child: SizedBox(
                     width: widget.douyinPlayerController.videoPlayerController
                         .value.size.width,
@@ -119,6 +128,57 @@ class _DouyinPlayerState extends State<DouyinPlayer>
                         .value.size.height,
                     child: VideoPlayer(
                       widget.douyinPlayerController.videoPlayerController,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: widget.douyinPlayerController.videoPlayerController
+                        .value.size.width,
+                    height: widget.douyinPlayerController.videoPlayerController
+                        .value.size.height,
+                    child: VideoPlayer(
+                      widget.douyinPlayerController.videoPlayerController,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [
+                      0.0,
+                      1,
+                    ],
+                    colors: [
+                      Colors.black87,
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [
+                        0.0,
+                        1,
+                      ],
+                      colors: [
+                        Colors.transparent,
+                        Colors.black54,
+                      ],
                     ),
                   ),
                 ),
@@ -142,19 +202,11 @@ class _DouyinPlayerState extends State<DouyinPlayer>
               ),
               if (!widget.douyinPlayerController.videoPlayerController.value
                   .isInitialized)
-                SafeArea(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      widget.douyinPlayerController.prepare();
-                    },
-                    child: const Center(
-                      child: Text(
-                        'Loading...',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
+                const Center(
+                  child: Text(
+                    'Loading...',
+                    style: TextStyle(
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -173,7 +225,8 @@ class _DouyinPlayerState extends State<DouyinPlayer>
       debugPrint('(${widget.douyinPlayerController.url}) - player push ');
     } else if (event == LifecycleEvent.visible) {
       await widget.douyinPlayerController.videoPlayerFuture;
-      debugPrint('(${widget.douyinPlayerController.url}) $event $currentLifecycleState - player visible ');
+      debugPrint(
+          '(${widget.douyinPlayerController.url}) $event $currentLifecycleState - player visible ');
       await Future.delayed(const Duration(milliseconds: 400));
       if (currentLifecycleState == LifecycleEvent.active) {
         widget.douyinPlayerController.play();

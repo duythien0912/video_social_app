@@ -71,6 +71,12 @@ final dataSourceProvider = Provider<List<String>>(
   },
 );
 
+final dataSourceImageProvider = Provider<List<String>>(
+  (ref) {
+    return dataM3u8Json['images'] as List<String>;
+  },
+);
+
 class DouyinPlayerControllerProviderParams {
   final String url;
   final bool isPlaying;
