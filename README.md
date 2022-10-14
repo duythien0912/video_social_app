@@ -1,23 +1,10 @@
-# video_driven_app
-
-A new Flutter project.
-
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-
-Demo:
+# [video_social_app](https://tingme.io) (WIP)
 
 https://user-images.githubusercontent.com/20185622/195805607-84b36325-754b-4d77-8db0-ab63a8b4988a.mp4
 
+Achieve short video app with smooth UI and UX
+
+* Design doc: (WIP)
+* Issue: https://github.com/duythien0912/video_social_app/issues
+* Project wiki: https://github.com/duythien0912/video_social_app/wiki (WIP)
+* Runnable example: lib/main.dart
