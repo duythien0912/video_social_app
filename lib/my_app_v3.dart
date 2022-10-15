@@ -1,59 +1,40 @@
+import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:video_player/video_player.dart';
 
 import 'player/tiktok_player_controller.dart';
-
-extension VideoPlayerValueX on VideoPlayerController {
-  initAndPlayLoop() async {
-    debugPrint('initAndPlayLoop:: $dataSource');
-    value = value.copyWith(
-      isPlaying: true,
-      isLooping: true,
-    );
-    await initialize();
-  }
-}
 
 final currentPage = StateProvider<int>((ref) {
   return 0;
 });
 
-final controllerFeatureProvider = FutureProvider<VideoPlayerController?>(
-  (ref) async {
-    final videos = ref.watch(dataSourceProvider);
-    final currentIndex = ref.watch(currentPage);
-
-    final controller = VideoPlayerController.network(videos[currentIndex]);
-
-    ref.onDispose(() {
-      controller.dispose();
-    });
-
-    await controller.initAndPlayLoop();
-
-    return controller;
-  },
+final BetterPlayerController _betterPlayerController = BetterPlayerController(
+  const BetterPlayerConfiguration(
+    aspectRatio: 9 / 16,
+    autoPlay: false,
+    autoDispose: false,
+    looping: true,
+  ),
 );
 
-class MyAppV2 extends ConsumerWidget {
-  const MyAppV2({super.key});
+class MyAppV3 extends ConsumerWidget {
+  const MyAppV3({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Flutter Demo',
-      showPerformanceOverlay: true,
+      // showPerformanceOverlay: true,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePageV2(),
+      home: const MyHomePageV3(),
     );
   }
 }
 
-class MyHomePageV2 extends ConsumerWidget {
-  const MyHomePageV2({super.key});
+class MyHomePageV3 extends ConsumerWidget {
+  const MyHomePageV3({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -77,8 +58,25 @@ class MyHomePageV2 extends ConsumerWidget {
                   final page = metrics.page!.round();
 
                   if (page != ref.read(currentPage)) {
-                    ref.invalidate(controllerFeatureProvider);
                     ref.read(currentPage.notifier).state = page;
+
+                    String source = videos[page];
+
+                    BetterPlayerDataSource betterPlayerDataSource =
+                        BetterPlayerDataSource(
+                      BetterPlayerDataSourceType.network,
+                      source,
+                      cacheConfiguration: const BetterPlayerCacheConfiguration(
+                        useCache: false,
+                      ),
+                    );
+
+                    _betterPlayerController
+                        .setupDataSource(betterPlayerDataSource)
+                        .then((value) async {
+                      await _betterPlayerController.seekTo(Duration.zero);
+                      await _betterPlayerController.play();
+                    });
 
                     // Pre-cache Image
                     try {
@@ -198,53 +196,11 @@ class _VideoPlayer extends ConsumerStatefulWidget {
 class __VideoPlayerState extends ConsumerState<_VideoPlayer> {
   @override
   Widget build(BuildContext context) {
-    final controllerValue = ref.watch(controllerFeatureProvider);
-    final currentPageValue = ref.watch(currentPage);
+    final index = ref.watch(currentPage);
 
-    return controllerValue.when(
-      data: (controller) {
-        if (controller == null) return const SizedBox();
-        if (currentPageValue != widget.index) return const SizedBox();
-
-        return AspectRatio(
-          aspectRatio: controller.value.aspectRatio,
-          child: Stack(
-            children: [
-              VideoPlayer(
-                key: ValueKey('child_VideoPlayer_${widget.index}'),
-                controller,
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: VideoProgressIndicator(
-                  controller,
-                  allowScrubbing: false,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      error: (e, s) {
-        debugPrint('$e');
-        debugPrint('$s');
-        return Center(
-          child: Text(
-            '$e',
-            style: const TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        );
-      },
-      loading: () => const Center(
-        child: Text(
-          'loading...',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      ),
+    if (widget.index != index) return const SizedBox();
+    return BetterPlayer(
+      controller: _betterPlayerController,
     );
   }
 }
