@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 

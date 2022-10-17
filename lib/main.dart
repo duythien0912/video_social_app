@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:video_driven_app/my_app_v2.dart';
 import 'package:video_driven_app/my_app_v3.dart';
 
 import 'lifecycle/lifecycle.dart';
