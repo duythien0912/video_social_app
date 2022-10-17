@@ -13,8 +13,8 @@ final dataM3u8Json = {
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb07.png",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb08.png",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb09.png",
-    //
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb10.png",
+    //
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb11.png",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb12.png",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb13.png",
@@ -42,6 +42,17 @@ final dataM3u8Json = {
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/thumb33.png",
   ],
   "videos": [
+    "https://stream.mux.com/nBOMzgyv1SKS3b7LDmkYhdmRMSe1mFs02oBdq66vwc02c.m3u8",
+    "https://stream.mux.com/1KfCJJ8JOxvpdU9EbyZdDp6VYk28q8H4BTz018l3Ioto.m3u8",
+    "https://stream.mux.com/vRXtTs02LEHh6FObC01e2XJ2R3T5oyOI90100HLUQ500nXCY.m3u8",
+    "https://stream.mux.com/n1ulDKPs8Ktg98CFNZEwrtrqKPuqj2595MFVBJHW02cM.m3u8",
+    "https://stream.mux.com/ULP70002Tf9Z00tn02IlP1vT1uTO73s3eZZVGz5u73bCD3g.m3u8",
+    "https://stream.mux.com/qAKBcQUw02Ba7qygzVBHiVICCft6yxFq6dDPNm6MQkU00.m3u8",
+    "https://stream.mux.com/v3NKxGANlMHnQLe02OE2vFZbd9p39gFLHLrBqTyreKxM.m3u8",
+    "https://stream.mux.com/6GDADoDsFZJs2IS6EkAT5DIFjwi5mCqoHq01MfYT3oYc.m3u8",
+    "https://stream.mux.com/IEtVowKoz77YDl01MjGEdNl6s1sAsSuGKSCuW72aVn01Y.m3u8",
+    "https://stream.mux.com/rxbt02izbwNNlSM01BMT00RHYMRlykQ5ks202MdtHPaWZVI.m3u8",
+
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video01.m3u8",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video02.m3u8",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video03.m3u8",
@@ -51,8 +62,9 @@ final dataM3u8Json = {
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video07.m3u8",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video08.m3u8",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video09.m3u8",
-    //
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video10.m3u8",
+
+    //
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video11.m3u8",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video12.m3u8",
     "https://raw.githubusercontent.com/duythien0912/sample_short_video/main/m3u8/video13.m3u8",

@@ -16,7 +16,16 @@ final baseConfigBetterPlayerControllerProvider =
     fit: BoxFit.contain,
     looping: true,
     showPlaceholderUntilPlay: false,
+    showSubtitlesDrawer: false,
     placeholder: SizedBox(),
+    autoPlay: true,
+    autoDispose: false,
+    handleLifecycle: false,
+    controlsConfiguration: BetterPlayerControlsConfiguration(
+      showControls: false,
+      backgroundColor: Colors.transparent,
+      loadingWidget: SizedBox(),
+    ),
   );
 });
 
@@ -30,7 +39,10 @@ final betterPlayerSourceProvider =
     source,
     liveStream: true,
     videoFormat: BetterPlayerVideoFormat.hls,
-    // cacheConfiguration: Platform.isAndroid
+    cacheConfiguration: const BetterPlayerCacheConfiguration(
+      useCache: true,
+    ),
+    //  Platform.isAndroid
     //     ? BetterPlayerCacheConfiguration(
     //         useCache: true,
     //         preCacheSize: 100 * 1024 * 1024,
@@ -43,31 +55,29 @@ final betterPlayerSourceProvider =
   return dataSource;
 });
 
+// currentPage controller
 final betterPlayerControllerProvider = Provider<BetterPlayerController>((ref) {
-  final config = ref.watch(baseConfigBetterPlayerControllerProvider);
-
-  final controller = BetterPlayerController(
-    config.copyWith(
-      autoPlay: true,
-      autoDispose: false,
-      handleLifecycle: false,
-      controlsConfiguration: const BetterPlayerControlsConfiguration(
-        // showControls: true,
-        showControls: false,
-        // controlsHideTime: Duration(seconds: 100),
-        backgroundColor: Colors.transparent,
-        loadingWidget: SizedBox(),
-      ),
-    ),
+  return BetterPlayerController(
+    ref.watch(baseConfigBetterPlayerControllerProvider).copyWith(),
   );
+});
 
-  ref.onDispose(
-    () {
-      // controller.dispose();
-    },
+// next page controller
+final nextPlayerControllerProvider = Provider<BetterPlayerController>((ref) {
+  return BetterPlayerController(
+    ref.watch(baseConfigBetterPlayerControllerProvider).copyWith(
+          autoPlay: false,
+        ),
   );
+});
 
-  return controller;
+// pre page controller
+final prePlayerControllerProvider = Provider<BetterPlayerController>((ref) {
+  return BetterPlayerController(
+    ref.watch(baseConfigBetterPlayerControllerProvider).copyWith(
+          autoPlay: false,
+        ),
+  );
 });
 
 class MyAppV3 extends ConsumerWidget {
@@ -198,7 +208,7 @@ class _MyHomePageV3State extends ConsumerState<MyHomePageV3> {
                 return false;
               },
               child: PageView.builder(
-                allowImplicitScrolling: false,
+                allowImplicitScrolling: true,
                 itemCount: videos.length,
                 scrollDirection: Axis.vertical,
                 onPageChanged: (int index) async {},
@@ -307,13 +317,7 @@ class __VideoPlayerState extends ConsumerState<_VideoPlayer> {
     WidgetsBinding.instance.addPostFrameCallback((final _) => _init());
   }
 
-  _init() async {
-    // final dataSource = ref.read(betterPlayerSourceProvider(widget.index));
-    // final betterPlayerController = ref.read(betterPlayerControllerProvider);
-    // // betterPlayerController.videoPlayerController?.dispose();
-    // debugPrint("setupDataSource: ${widget.index}");
-    // await betterPlayerController.setupDataSource(dataSource);
-  }
+  _init() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -323,12 +327,13 @@ class __VideoPlayerState extends ConsumerState<_VideoPlayer> {
     final betterPlayerController = ref.watch(betterPlayerControllerProvider);
     final dataSource = ref.watch(betterPlayerSourceProvider(widget.index));
     final stopwatch = Stopwatch()..start();
+    debugPrint('setupDataSource() start');
 
     return FutureBuilder(
       future: betterPlayerController.setupDataSource(dataSource),
       builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          debugPrint('doSomething() executed in ${stopwatch.elapsed}');
+          debugPrint('setupDataSource() executed in ${stopwatch.elapsed}');
           debugPrint("rebuid player widget: ${widget.index}");
           return BetterPlayer(
             key: ValueKey('_BetterPlayer_${widget.index}'),
