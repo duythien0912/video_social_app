@@ -32,11 +32,9 @@ packages:
   better_player:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: "7cb86b0bd01d1ba496ffcac4c6bfcc5d8f938d70"
-      url: "https://github.com/duythien0912/betterplayer.git"
-    source: git
+      path: "packages/betterplayer"
+      relative: true
+    source: path
     version: "0.0.83"
   boolean_selector:
     dependency: transitive

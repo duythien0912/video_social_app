@@ -1,84 +1,133 @@
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:better_player/src/video_player/video_player.dart';
 
 import 'player/tiktok_player_controller.dart';
 
-final currentPage = StateProvider<int>((ref) {
-  return 0;
-});
+final currentPageSProvider = StateProvider<int>(
+  (ref) => 0,
+);
+final activePageSProvider = StateProvider<List<int>>(
+  (ref) {
+    return [];
+  },
+);
 
-final baseConfigBetterPlayerControllerProvider =
-    Provider<BetterPlayerConfiguration>((ref) {
-  return const BetterPlayerConfiguration(
-    aspectRatio: 9 / 16,
-    fit: BoxFit.contain,
-    looping: true,
-    showPlaceholderUntilPlay: false,
-    showSubtitlesDrawer: false,
-    placeholder: SizedBox(),
-    autoPlay: true,
-    autoDispose: false,
-    handleLifecycle: false,
-    controlsConfiguration: BetterPlayerControlsConfiguration(
-      showControls: false,
-      backgroundColor: Colors.transparent,
-      loadingWidget: SizedBox(),
-    ),
-  );
-});
+final dataSourceByPageProvider = Provider.family<BetterPlayerDataSource, int>(
+  (ref, index) {
+    final videos = ref.watch(dataSourceProvider);
+    String source = videos[index];
 
-final betterPlayerSourceProvider =
-    Provider.family<BetterPlayerDataSource, int>((ref, index) {
-  final videos = ref.watch(dataSourceProvider);
-  String source = videos[index];
+    BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+      BetterPlayerDataSourceType.network,
+      source,
+      liveStream: true,
+      videoFormat: BetterPlayerVideoFormat.hls,
+      cacheConfiguration: const BetterPlayerCacheConfiguration(
+        useCache: false,
+      ),
+    );
 
-  BetterPlayerDataSource dataSource = BetterPlayerDataSource(
-    BetterPlayerDataSourceType.network,
-    source,
-    liveStream: true,
-    videoFormat: BetterPlayerVideoFormat.hls,
-    cacheConfiguration: const BetterPlayerCacheConfiguration(
-      useCache: true,
-    ),
-    //  Platform.isAndroid
-    //     ? BetterPlayerCacheConfiguration(
-    //         useCache: true,
-    //         preCacheSize: 100 * 1024 * 1024,
-    //         maxCacheSize: 10 * 1024 * 1024,
-    //         maxCacheFileSize: 100 * 1024 * 1024,
-    //         key: source,
-    //       )
-    //     : null,
-  );
-  return dataSource;
-});
+    ref.onDispose(() {
+      //  clear garbage
+    });
+    return dataSource;
+  },
+);
 
-// currentPage controller
-final betterPlayerControllerProvider = Provider<BetterPlayerController>((ref) {
-  return BetterPlayerController(
-    ref.watch(baseConfigBetterPlayerControllerProvider).copyWith(),
-  );
-});
+final playerControllerByPageProvider =
+    Provider.family<BetterPlayerController, int>(
+  (ref, id) {
+    final source = ref.watch(dataSourceByPageProvider(id));
 
-// next page controller
-final nextPlayerControllerProvider = Provider<BetterPlayerController>((ref) {
-  return BetterPlayerController(
-    ref.watch(baseConfigBetterPlayerControllerProvider).copyWith(
-          autoPlay: false,
+    final controller = BetterPlayerController(
+      const BetterPlayerConfiguration(
+        aspectRatio: 9 / 16,
+        fit: BoxFit.fitWidth,
+        looping: true,
+        showPlaceholderUntilPlay: false,
+        showSubtitlesDrawer: false,
+        // placeholder: Image.network(
+        //   images[id],
+        //   fit: BoxFit.cover,
+        // ),
+        placeholder: SizedBox(), // for optimate Heap Memory
+        autoPlay: false,
+        autoDispose: false,
+        handleLifecycle: false,
+        controlsConfiguration: BetterPlayerControlsConfiguration(
+          showControls: false,
+          backgroundColor: Colors.transparent,
+          loadingWidget: SizedBox(),
         ),
-  );
-});
+      ),
+      betterPlayerDataSource: source,
+    );
 
-// pre page controller
-final prePlayerControllerProvider = Provider<BetterPlayerController>((ref) {
-  return BetterPlayerController(
-    ref.watch(baseConfigBetterPlayerControllerProvider).copyWith(
-          autoPlay: false,
-        ),
-  );
-});
+    ref.onDispose(() {
+      //  clear garbage
+      controller.clearCache();
+      controller.dispose();
+    });
+
+    return controller;
+  },
+);
+
+class PlayPauseProviderParamsClass {
+  final int index;
+  final bool isPlay;
+
+  const PlayPauseProviderParamsClass({
+    required this.index,
+    required this.isPlay,
+  });
+}
+
+final playPauseProvider = Provider.family<bool, PlayPauseProviderParamsClass>(
+  (ref, params) {
+    final player = ref.watch(
+      playerControllerByPageProvider(params.index),
+    );
+
+    if (params.isPlay) {
+      if (player.isPlaying() ?? false) return false;
+
+      player.play().then(
+        (value) {
+          ref.read(activePageSProvider.notifier).update(
+                (state) => [params.index, ...state],
+              );
+        },
+      );
+
+      return true;
+    } else {
+      if (!(player.isPlaying() ?? false)) return false;
+
+      player.pause().then(
+        (value) async {
+          ref.read(activePageSProvider.notifier).update(
+            (state) {
+              state.remove(params.index);
+              return [...state];
+            },
+          );
+          if (!(player.isVideoInitialized() ?? false)) return false;
+          if (player.videoPlayerController?.value.duration == null) {
+            return false;
+          }
+          if ((player.videoPlayerController?.value.duration
+                      ?.compareTo(Duration.zero) ??
+                  0) >
+              0) return false;
+          await player.seekTo(Duration.zero);
+        },
+      );
+    }
+    return false;
+  },
+);
 
 class MyAppV3 extends ConsumerWidget {
   const MyAppV3({super.key});
@@ -87,7 +136,7 @@ class MyAppV3 extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Flutter Demo',
-      // showPerformanceOverlay: true,
+      showPerformanceOverlay: true,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -112,24 +161,59 @@ class _MyHomePageV3State extends ConsumerState<MyHomePageV3> {
   }
 
   _init() async {
-    final videos = ref.read(dataSourceProvider);
-    final dataSource = BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network,
-      videos[1],
-    );
+    ref.read(playPauseProvider(
+      const PlayPauseProviderParamsClass(index: 0, isPlay: true),
+    ));
 
-    VideoPlayerController(
-      bufferingConfiguration: dataSource.bufferingConfiguration,
+    // ref.read(playerControllerByPageProvider(1)).preCache(
+    //       ref.read(dataSourceByPageProvider(1)),
+    //     );
+  }
+
+  bool _onNotification(ScrollNotification notification) {
+    if (notification.depth != 0) return false;
+    if (notification is! ScrollUpdateNotification) return false;
+
+    final metrics = notification.metrics as PageMetrics;
+    final page = metrics.page!.round();
+    // debugPrint('ScrollEndNotification: ${metrics.page} $page');
+
+    if (page == ref.read(currentPageSProvider)) return false;
+
+    ref.read(currentPageSProvider.notifier).state = page;
+    _pauseAllAndPlayIndex(page);
+
+    return false;
+  }
+
+  _pauseAllAndPlayIndex(int index) {
+    final listActive = ref.read(activePageSProvider);
+    for (var activeItem in listActive) {
+      ref.read(
+        playPauseProvider(
+          PlayPauseProviderParamsClass(index: activeItem, isPlay: false),
+        ),
+      );
+    }
+    if (index >= 2) {
+      ref.read(playerControllerByPageProvider(index - 2)).dispose();
+      ref.read(playerControllerByPageProvider(index + 2)).dispose();
+      // ref.read(playerControllerByPageProvider(index + 2)).clearCache();
+    }
+    // ref.read(playerControllerByPageProvider(index + 1)).preCache(
+    //       ref.read(dataSourceByPageProvider(index + 1)),
+    //     );
+
+    ref.read(
+      playPauseProvider(
+        PlayPauseProviderParamsClass(index: index, isPlay: true),
+      ),
     );
-    await ref.read(betterPlayerControllerProvider).preCache(
-          dataSource,
-        );
   }
 
   @override
   Widget build(BuildContext context) {
     final videos = ref.watch(dataSourceProvider);
-    final images = ref.watch(dataSourceImageProvider);
 
     return Scaffold(
       backgroundColor: Colors.black87,
@@ -137,153 +221,23 @@ class _MyHomePageV3State extends ConsumerState<MyHomePageV3> {
         children: [
           Expanded(
             child: NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification notification) {
-                if (notification.depth == 0 &&
-                    notification is ScrollEndNotification) {
-                  final PageMetrics metrics =
-                      notification.metrics as PageMetrics;
-
-                  debugPrint('ScrollEndNotification: ${metrics.page}');
-
-                  final page = metrics.page!.round();
-
-                  if (page != ref.read(currentPage)) {
-                    ref.read(currentPage.notifier).state = page;
-
-                    // Pre-cache Image
-                    // controlle play, stop, start video
-
-                    try {
-                      setupNext() async {
-                        debugPrint('cache video: $page +1');
-                        await ref.read(betterPlayerControllerProvider).preCache(
-                              BetterPlayerDataSource(
-                                BetterPlayerDataSourceType.network,
-                                videos[page + 1],
-                              ),
-                            );
-
-                        debugPrint('cache video: $page +2 +3');
-                        VideoPlayerController(
-                          bufferingConfiguration: BetterPlayerDataSource(
-                            BetterPlayerDataSourceType.network,
-                            videos[page + 1],
-                          ).bufferingConfiguration,
-                        );
-                        VideoPlayerController(
-                          bufferingConfiguration: BetterPlayerDataSource(
-                            BetterPlayerDataSourceType.network,
-                            videos[page + 2],
-                          ).bufferingConfiguration,
-                        );
-
-                        ref.read(betterPlayerControllerProvider).preCache(
-                              BetterPlayerDataSource(
-                                BetterPlayerDataSourceType.network,
-                                videos[page + 2],
-                              ),
-                            );
-                        ref.read(betterPlayerControllerProvider).preCache(
-                              BetterPlayerDataSource(
-                                BetterPlayerDataSourceType.network,
-                                videos[page + 3],
-                              ),
-                            );
-                      }
-
-                      setupNext();
-
-                      debugPrint('cache image: $page +1 +2 +3');
-                      final images = ref.read(dataSourceImageProvider);
-                      precacheImage(NetworkImage(images[page + 1]), context);
-                      precacheImage(NetworkImage(images[page + 2]), context);
-                      precacheImage(NetworkImage(images[page + 3]), context);
-                    } on RangeError {
-                      debugPrint('RangeError: $page');
-                    } catch (e, s) {
-                      debugPrint('$e $s');
-                    }
-                  }
-                }
-                return false;
-              },
+              onNotification: _onNotification,
               child: PageView.builder(
                 allowImplicitScrolling: true,
                 itemCount: videos.length,
                 scrollDirection: Axis.vertical,
-                onPageChanged: (int index) async {},
                 itemBuilder: (BuildContext context, int index) {
-                  String source = videos[index];
-                  String image = images[index];
-
-                  return SafeArea(
-                    child: Stack(
-                      children: [
-                        SafeArea(
-                          child: SizedBox.expand(
-                            child: Image.network(
-                              image,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        _VideoPlayer(
-                          key: ValueKey('_VideoPlayer_$index'),
-                          index: index,
-                        ),
-                        Container(
-                          height: 200,
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              stops: [
-                                0.0,
-                                1,
-                              ],
-                              colors: [
-                                Colors.black87,
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            height: 200,
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                stops: [
-                                  0.0,
-                                  1,
-                                ],
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black54,
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        SafeArea(
-                          child: Text(
-                            source,
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '$index',
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                  String video = videos[index];
+                  return Stack(
+                    children: [
+                      _VideoPlayer(
+                        key: ValueKey('_VideoPlayer_$index'),
+                        index: index,
+                      ),
+                      const _TopShadow(),
+                      const _BottomShadow(),
+                      _DebugPlayerWidget(video: video),
+                    ],
                   );
                 },
               ),
@@ -298,54 +252,91 @@ class _MyHomePageV3State extends ConsumerState<MyHomePageV3> {
   }
 }
 
-class _VideoPlayer extends ConsumerStatefulWidget {
+class _VideoPlayer extends ConsumerWidget {
   const _VideoPlayer({
     super.key,
     required this.index,
   });
 
   final int index;
+
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => __VideoPlayerState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    return BetterPlayer(
+      key: ValueKey('_BetterPlayer_$index'),
+      controller: ref.watch(playerControllerByPageProvider(index)),
+    );
+  }
 }
 
-class __VideoPlayerState extends ConsumerState<_VideoPlayer> {
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((final _) => _init());
-  }
-
-  _init() async {}
+class _DebugPlayerWidget extends ConsumerWidget {
+  const _DebugPlayerWidget({required this.video});
+  final String video;
 
   @override
-  Widget build(BuildContext context) {
-    final index = ref.watch(currentPage);
-    if (widget.index != index) return const SizedBox();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activePageValue = ref.watch(activePageSProvider);
 
-    final betterPlayerController = ref.watch(betterPlayerControllerProvider);
-    final dataSource = ref.watch(betterPlayerSourceProvider(widget.index));
-    final stopwatch = Stopwatch()..start();
-    debugPrint('setupDataSource() start');
-
-    return FutureBuilder(
-      future: betterPlayerController.setupDataSource(dataSource),
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          debugPrint('setupDataSource() executed in ${stopwatch.elapsed}');
-          debugPrint("rebuid player widget: ${widget.index}");
-          return BetterPlayer(
-            key: ValueKey('_BetterPlayer_${widget.index}'),
-            controller: betterPlayerController,
-          );
-        }
-        return const SizedBox();
-      },
+    return SafeArea(
+      child: Text(
+        '$video\nactive: ${activePageValue.join(', ')}',
+        style: const TextStyle(
+          color: Colors.white,
+        ),
+      ),
     );
-    // return BetterPlayer(
-    //   key: ValueKey('_BetterPlayer_${widget.index}'),
-    //   controller: betterPlayerController,
-    // );
+  }
+}
+
+class _TopShadow extends ConsumerWidget {
+  const _TopShadow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      height: 200,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: [
+            0.0,
+            1,
+          ],
+          colors: [
+            Colors.black87,
+            Colors.transparent,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomShadow extends ConsumerWidget {
+  const _BottomShadow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        height: 200,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: [
+              0.0,
+              1,
+            ],
+            colors: [
+              Colors.transparent,
+              Colors.black54,
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

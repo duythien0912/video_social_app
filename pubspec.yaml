@@ -30,9 +30,10 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   better_player:
-    git:
-      url: https://github.com/duythien0912/betterplayer.git
-      ref: master
+    path: ./packages/betterplayer
+    # git:
+    #   url: https://github.com/duythien0912/betterplayer.git
+    #   ref: master
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
